@@ -1,6 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-import { type } from "node:os";
-import { GenderEnum, ProviderEnum } from "../../common/enum/user.enum.js";
+import { GenderEnum, ProviderEnum, RoleEnum } from "../../common/enum/user.enum.js";
 
 const UserShcema = new Schema(
  {
@@ -8,14 +7,14 @@ const UserShcema = new Schema(
     type:String,
     required:true,
     minLength:3,
-    maxLength:5,
+    maxLength:30,
     trim:true
   },
   lastName: {
     type:String,
     required:true,
     minLength:3,
-    maxLength:5,
+    maxLength:30,
     trim:true
   },
   email: {
@@ -26,9 +25,12 @@ const UserShcema = new Schema(
   },
     password: {
       type:String,
-      required:true,
+      required: function () 
+      {
+       return this.provider == ProviderEnum.google ? false : true  
+      },
       trim:true,
-      minLength:6
+      minLength:6,
     },
      age: Number,
       phone: {
@@ -41,12 +43,26 @@ const UserShcema = new Schema(
       enum: Object.values(GenderEnum),
       default: GenderEnum.male
      },
+     Roles: {
+      type:String,
+      enum: Object.values(RoleEnum),
+      default: RoleEnum.user
+     },
      profilePicture: String,
      confirmed:Boolean,
      provider: {
       type:String,
       enum: Object.values(ProviderEnum),
       default: ProviderEnum.system
+     },
+
+     visitCount: {
+      type:Number,
+      default:0
+     },
+     lastVisit: {
+      type:Date,
+      default:Date.now
      }
  },
 
@@ -66,5 +82,6 @@ UserShcema.virtual("userName")
   const  [firstName,lastName] =v.split(" ")
   this.set({firstName,lastName})
 })
+
 const userModel = mongoose.models.user || mongoose.model("user",UserShcema)
 export default userModel

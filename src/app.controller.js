@@ -2,12 +2,14 @@ import express from "express"
 import cs from "./config/config.service.js"
 import checkConnectionDB from "./DB/connectionDB.js";
 import userRouter from "./modules/users/user.controller.js";
+import cors from "cors"
+
 const app = express();
 
 
 const bootstarp = () => {
 
-    app.use(express.json());
+    app.use(cors(),express.json());
  
     app.get("/",(req,res,next)=> {
         res.status(200).json({msg: "Welcome to Saraha"})
