@@ -148,7 +148,6 @@ export const getProfile = async (req, res, next) => {
 };
 
 
-// Service بتاع جلب عدد الزيارات
 export const getMyVisits = async (req, res, next) => {
   const user = await userModel.findById(req.user._id);
   
