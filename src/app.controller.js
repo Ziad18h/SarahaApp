@@ -1,43 +1,51 @@
-import express from "express"
-import cs from "./config/config.service.js"
+import path from "node:path";
+import cors from "cors";
+import express from "express";
+import cs from "./config/config.service.js";
 import checkConnectionDB from "./DB/connectionDB.js";
+import { CheckRedisConnect } from "./DB/Redis/redis.connect.js";
+import { startBackgroundJobs } from "./common/utilties/cron.service.js";
+import messageRouter from "./modules/messages/message.controller.js";
 import userRouter from "./modules/users/user.controller.js";
-import cors from "cors"
 
 const app = express();
 
+const bootstarp = async () => {
+  app.use(cors());
+  app.use(express.json());
+  app.use("/files", express.static(path.resolve("files")));
 
-const bootstarp = () => {
+  app.get("/", (req, res) => {
+    res.status(200).json({ msg: "Welcome to Saraha" });
+  });
 
-    app.use(cors(),express.json());
- 
-    app.get("/",(req,res,next)=> {
-        res.status(200).json({msg: "Welcome to Saraha"})
-    })
- checkConnectionDB()
+  await checkConnectionDB();
+  await CheckRedisConnect();
+  startBackgroundJobs();
 
+  app.use("/users", userRouter);
+  app.use("/messages", messageRouter);
 
+  app.use((req, res, next) => {
+    next(new Error(`Url ${req.originalUrl} Not Found`, { cause: 404 }));
+  });
 
+  app.use((err, req, res, next) => {
+    const statusCode = Number(err.cause) || 500;
+    const response = {
+      message: err.message || "Internal Server Error",
+    };
 
-app.use('/users',userRouter)
+    if (process.env.NODE_ENV !== "production") {
+      response.stack = err.stack;
+    }
 
-    app.use("{/*demo}",(req,res,next)=> {
-      throw new Error(`Url ${req.originalUrl} Not Found....`, {cause:404});
-      
-    })
+    res.status(statusCode).json(response);
+  });
 
+  app.listen(cs.port, () => {
+    console.log(`server is running on port ${cs.port}`);
+  });
+};
 
-app.use((err,req,res,next) => {
-   
-   res.status(err.cause ||500).json({message: err.message, stack: err.stack})
-})
-
-    app.listen(cs.port,()=> {
-        console.log(`sever is running on port ${cs.port}`);
-    })
-}
-
-
-export {
-    bootstarp
-}
+export { bootstarp };

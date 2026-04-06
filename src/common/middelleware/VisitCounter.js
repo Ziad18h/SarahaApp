@@ -1,22 +1,16 @@
 import userModel from "../../DB/models/user.model.js";
 
-export  const visitCounter = async (req, res, next) => {
-  console.log('🔄 Visit counter middleware');
-  
+export const visitCounter = async (req, res, next) => {
   if (req.user && req.user._id) {
     try {
-      await userModel.findByIdAndUpdate(
-        req.user._id,
-        {
-          $inc: { visitCount: 1 },
-          $set: { lastVisit: new Date() }
-        }
-      );
-      
-      console.log('✅ Visit count updated for user:', req.user._id);
+      await userModel.findByIdAndUpdate(req.user._id, {
+        $inc: { visitCount: 1 },
+        $set: { lastVisit: new Date() },
+      });
     } catch (error) {
-      console.log('❌ Error:', error.message);
+      console.error("Visit counter update failed", error.message);
     }
   }
+
   next();
 };

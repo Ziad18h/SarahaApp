@@ -1,40 +1,64 @@
-import { populate } from "dotenv"
-import { model } from "mongoose"
+export const create = async ({ model, data } = {}) => {
+  return model.create(data);
+};
 
+export const findOne = async ({
+  model,
+  filter = {},
+  populate = [],
+  select = "",
+} = {}) => {
+  return model.findOne(filter).populate(populate).select(select).exec();
+};
 
+export const find = async ({
+  model,
+  filter = {},
+  populate = [],
+  select = "",
+  sort = {},
+  skip = 0,
+  limit = 0,
+} = {}) => {
+  const query = model.find(filter).populate(populate).select(select).sort(sort);
 
-export const create = async ({model,data}={}) => {
-    return await model.create(data)
-}
+  if (skip) {
+    query.skip(skip);
+  }
 
-export const findOne = async ({model,filter={}, populate=[], select = ""}={})=> {
-    return await model.findOne(filter).populate(populate).select(select)
-}
+  if (limit) {
+    query.limit(limit);
+  }
 
+  return query.exec();
+};
 
-export const find = async ({model,filter={},options={}, select = ""}={})=> {
-    const doc = model.findOne(filter).populate(populate).select(select)
+export const updateOne = async ({
+  model,
+  filter = {},
+  update = {},
+  options = {},
+} = {}) => {
+  return model.updateOne(filter, update, { runValidators: true, ...options }).exec();
+};
 
-    if(options.populate) {
-doc.populate(options.populate)
-    }
-    if(options.skip) {
-doc.skip(options.skip)
-    }
-    if(options.limit) {
-doc.limit(options.limit)
-    }
-    return await doc.exec()
+export const findOneAndUpdate = async ({
+  model,
+  filter = {},
+  update = {},
+  options = {},
+} = {}) => {
+  return model
+    .findOneAndUpdate(filter, update, {
+      new: true,
+      runValidators: true,
+      ...options,
+    })
+    .exec();
+};
 
-}
+export const findOneupdate = findOneAndUpdate;
 
-
-    export const updateOne = async ({model,filter={},update={},options={}}={}) => {
-        const doc =  model.updateOne(filter,update,{runValidators:true,...options})
-        return await doc.exec()
-}
-
-    export const findOneupdate = async ({model,filter={},update={},options={}}={}) => {
-    const doc = model.updateOne(filter,update,{new: true, runValidators:true,...options})
-        return await doc.exec()
-}
+export const deleteOne = async ({ model, filter = {} } = {}) => {
+  return model.deleteOne(filter).exec();
+};

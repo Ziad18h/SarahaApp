@@ -1,14 +1,14 @@
-import mongoose from "mongoose";    
-import cs from "./../config/config.service.js"
+import mongoose from "mongoose";
+import cs from "../config/config.service.js";
 
+const checkConnectionDB = async () => {
+  try {
+    await mongoose.connect(cs.uri);
+    console.log("DB Connected");
+  } catch (error) {
+    console.error("Database connection failed", error);
+    throw error;
+  }
+};
 
- const checkConnectionDB = async() => {
-   await mongoose.connect(cs.uri)
-    .then(()=> {
-        console.log("DB Connected");
-    })
-    .catch((error)=> {
-        console.log("Something went wrong",error);        
-    })
-}
-export default checkConnectionDB
+export default checkConnectionDB;

@@ -1,12 +1,9 @@
-
-
-export const authorization = (Roles=[]) => {
+export const authorization = (Roles = []) => {
   return async (req, res, next) => {
-
-    if(!Roles.includes(req.user.Roles)) {
-       throw new Error("Unauthorized");
+    if (!Roles.includes(req.user.Roles)) {
+      throw new Error("Unauthorized", { cause: 403 });
     }
-  
-  next();
+
+    next();
+  };
 };
-}
